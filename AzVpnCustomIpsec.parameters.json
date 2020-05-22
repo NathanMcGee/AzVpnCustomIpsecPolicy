@@ -1,0 +1,57 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "existingVirtualNetworkGateway": {
+      "value": null
+    },
+    "localNetworkGatewayName": {
+      "value": null
+    },
+    "onPremisesAddressSpaceArray": {
+      "value": [
+        "192.168.0.0/24",
+        "192.168.1.0/24"
+      ]
+    },
+    "onPremisesGatewayIP": {
+      "value": null
+    },
+    "vpnName": {
+      "value": "Azure-to-OnPremises"
+    },
+    "vpnProtocol": {
+      "value": "IKEv2"
+    },
+    "saLifeTimeSeconds": {
+      "value": 3600
+    },
+    "saDataSizeKilobytes": {
+      "value": 1024000000
+    },
+    "ipsecEncryption": {
+      "value": "AES256"
+    },
+    "ipsecIntegrity": {
+      "value": "SHA256"
+    },
+    "ikeEncryption": {
+      "value": "AES256"
+    },
+    "ikeIntegrity": {
+      "value": "SHA256"
+    },
+    "dhGroup": {
+      "value": "DHGroup14"
+    },
+    "pfsGroup": {
+      "value": "PFS14"
+    },
+    "sharedKey": {
+      "value": null
+    },
+    "policyBasedTrafficSelectors": {
+      "value": null
+    }
+  }
+}
