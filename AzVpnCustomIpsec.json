@@ -11,31 +11,31 @@
         "localNetworkGatewayName": {
             "type": "string",
             "metadata": {
-                "description": "Name that will define the Local (On-Premise) Network Gateway (ex: ldn-localnetworkgateway-01)"
+                "description": "Name that will define the Local (On-Premises) Network Gateway (ex: ldn-localnetworkgateway-01)"
             }
         },
-        "onPremiseAddressSpaceArray": {
+        "onPremisesAddressSpaceArray": {
             "type": "array",
             "metadata": {
-                "description": "Array of Subnets that represent the local networks on the On-Premise side of the VPN"
+                "description": "Array of Subnets that represent the local networks on the On-Premises side of the VPN"
             },
             "defaultValue": [
                 "192.168.0.0/24",
                 "192.168.1.0/24"
             ]
         },
-        "onPremiseGatewayIP": {
+        "onPremisesGatewayIP": {
             "type": "string",
             "metadata": {
-                "description": "The public endpoint IP address of the On-Premise VPN Gateway"
+                "description": "The public endpoint IP address of the On-Premises VPN Gateway"
             }
         },
         "vpnName": {
             "type": "string",
             "metadata": {
-                "description": "Name of the VPN connection between Azure and On-Premise (ex: AzureUKS-to-LDN)"
+                "description": "Name of the VPN connection between Azure and On-Premises (ex: AzureUKS-to-LDN)"
             },
-            "defaultValue": "Azure-to-OnPremise"
+            "defaultValue": "Azure-to-OnPremises"
         },
         "vpnProtocol": {
             "type": "string",
@@ -170,7 +170,7 @@
         "policyBasedTrafficSelectors": {
             "type": "bool",
             "metadata": {
-                "description": "Enable this if the OnPremise VPN endpoint needs to be configured as a Policy-Based VPN"
+                "description": "Enable this if the OnPremises VPN endpoint needs to be configured as a Policy-Based VPN"
             },
             "defaultValue": false,
             "allowedValues": [
@@ -185,14 +185,14 @@
     "resources": [
         {
             "type": "Microsoft.Network/localNetworkGateways",
-            "apiVersion": "2020-03-01",
+            "apiVersion": "2020-04-01",
             "name": "[parameters('localNetworkGatewayName')]",
             "location": "[variables('location')]",
             "properties": {
                 "localNetworkAddressSpace": {
-                    "addressPrefixes": "[parameters('onPremiseAddressSpaceArray')]"
+                    "addressPrefixes": "[parameters('onPremisesAddressSpaceArray')]"
                 },
-                "gatewayIpAddress": "[parameters('onPremiseGatewayIP')]"
+                "gatewayIpAddress": "[parameters('onPremisesGatewayIP')]"
             }
         },
         {
