@@ -1,0 +1,232 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "existingVirtualNetworkGateway": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of existing Virtual Network Gateway to deploy the connection to"
+            }
+        },
+        "localNetworkGatewayName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name that will define the Local (On-Premise) Network Gateway (ex: ldn-localnetworkgateway-01)"
+            }
+        },
+        "onPremiseAddressSpaceArray": {
+            "type": "array",
+            "metadata": {
+                "description": "Array of Subnets that represent the local networks on the On-Premise side of the VPN"
+            },
+            "defaultValue": [
+                "192.168.0.0/24",
+                "192.168.1.0/24"
+            ]
+        },
+        "onPremiseGatewayIP": {
+            "type": "string",
+            "metadata": {
+                "description": "The public endpoint IP address of the On-Premise VPN Gateway"
+            }
+        },
+        "vpnName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the VPN connection between Azure and On-Premise (ex: AzureUKS-to-LDN)"
+            },
+            "defaultValue": "Azure-to-OnPremise"
+        },
+        "vpnProtocol": {
+            "type": "string",
+            "metadata": {
+                "description": "Protocol utilised by the VPN Connection (IKEv1, IKEv2)"
+            },
+            "defaultValue": "IKEv2",
+            "allowedValues": [
+                "IKEv1",
+                "IKEv2"
+            ]
+        },
+        "saLifeTimeSeconds": {
+            "type": "int",
+            "metadata": {
+                "description": "Security Association Lifetime (Seconds)"
+            },
+            "defaultValue": 3600
+        },
+        "saDataSizeKilobytes": {
+            "type": "int",
+            "metadata": {
+                "description": "Security Association Data Size (KB)"
+            },
+            "defaultValue": 1024000000
+        },
+        "ipsecEncryption": {
+            "type": "string",
+            "metadata": {
+                "description": "IPSec Encryption"
+            },
+            "defaultValue": "AES256",
+            "allowedValues": [
+                "None",
+                "DES",
+                "DES3",
+                "AES128",
+                "AES192",
+                "AES256",
+                "GCMAES128",
+                "GCMAES192",
+                "GCMAES256"
+            ]
+        },
+        "ipsecIntegrity": {
+            "type": "string",
+            "metadata": {
+                "description": "IPSec Integrity"
+            },
+            "defaultValue": "SHA256",
+            "allowedValues": [
+                "MD5",
+                "SHA1",
+                "SHA256",
+                "GCMAES128",
+                "GCMAES192",
+                "GCMAES256"
+            ]
+        },
+        "ikeEncryption": {
+            "type": "string",
+            "metadata": {
+                "description": "IKE Encryption"
+            },
+            "defaultValue": "AES256",
+            "allowedValues": [
+                "DES",
+                "DES3",
+                "AES128",
+                "AES192",
+                "AES256",
+                "GCMAES256",
+                "GCMAES128"
+            ]
+        },
+        "ikeIntegrity": {
+            "type": "string",
+            "metadata": {
+                "description": "IKE Integrity"
+            },
+            "defaultValue": "SHA256",
+            "allowedValues": [
+                "MD5",
+                "SHA1",
+                "SHA256",
+                "SHA384",
+                "GCMAES256",
+                "GCMAES128"
+            ]
+        },
+        "dhGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Diffie-Hellman Group"
+            },
+            "defaultValue": "DHGroup14",
+            "allowedValues": [
+                "None",
+                "DHGroup1",
+                "DHGroup2",
+                "DHGroup14",
+                "DHGroup2048",
+                "ECP256",
+                "ECP384",
+                "DHGroup24"
+            ]
+        },
+        "pfsGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Perfect Forward Secrecy Group"
+            },
+            "defaultValue": "PFS14",
+            "allowedValues": [
+                "None",
+                "PFS1",
+                "PFS2",
+                "PFS2048",
+                "ECP256",
+                "ECP384",
+                "PFS24",
+                "PFS14",
+                "PFSMM"
+            ]
+        },
+        "sharedKey": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Pre-Shared Key"
+            }
+        },
+        "policyBasedTrafficSelectors": {
+            "type": "bool",
+            "metadata": {
+                "description": "Enable this if the OnPremise VPN endpoint needs to be configured as a Policy-Based VPN"
+            },
+            "defaultValue": false,
+            "allowedValues": [
+                true,
+                false
+            ]
+        }
+    },
+    "variables": {
+        "location": "[resourceGroup().location]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Network/localNetworkGateways",
+            "apiVersion": "2020-03-01",
+            "name": "[parameters('localNetworkGatewayName')]",
+            "location": "[variables('location')]",
+            "properties": {
+                "localNetworkAddressSpace": {
+                    "addressPrefixes": "[parameters('onPremiseAddressSpaceArray')]"
+                },
+                "gatewayIpAddress": "[parameters('onPremiseGatewayIP')]"
+            }
+        },
+        {
+            "type": "Microsoft.Network/connections",
+            "apiVersion": "2020-04-01",
+            "name": "[parameters('vpnName')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[parameters('localNetworkGatewayName')]"
+            ],
+            "properties": {
+                "virtualNetworkGateway1": {
+                    "id": "[resourceId('Microsoft.Network/virtualNetworkGateways', parameters('existingVirtualNetworkGateway'))]"
+                },
+                "localNetworkGateway2": {
+                    "id": "[resourceId('Microsoft.Network/localNetworkGateways', parameters('localNetworkGatewayName'))]"
+                },
+                "connectionType": "IPsec",
+                "connectionProtocol": "[parameters('vpnProtocol')]",
+                "sharedKey": "[parameters('sharedKey')]",
+                "usePolicyBasedTrafficSelectors": "[parameters('policyBasedTrafficSelectors')]",
+                "ipsecPolicies": [
+                    {
+                        "saLifeTimeSeconds": "[parameters('saLifeTimeSeconds')]",
+                        "saDataSizeKilobytes": "[parameters('saDataSizeKilobytes')]",
+                        "ipsecEncryption": "[parameters('ipsecEncryption')]",
+                        "ipsecIntegrity": "[parameters('ipsecIntegrity')]",
+                        "ikeEncryption": "[parameters('iKEEncryption')]",
+                        "ikeIntegrity": "[parameters('ikeIntegrity')]",
+                        "dhGroup": "[parameters('dhGroup')]",
+                        "pfsGroup": "[parameters('pfsGroup')]"
+                    }
+                ]
+            }
+        }
+    ]
+}
